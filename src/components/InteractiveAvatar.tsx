@@ -160,7 +160,7 @@ const RevealStage = ({
 
     return (
         <div className="w-full h-full bg-black flex items-center justify-center p-12 relative animate-in zoom-in-95 fade-in duration-1000">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#D4AF3715_0%,_transparent_70%)] opacity-30"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#D4AF3715_0%,_transparent_70%)] opacity-30" style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}></div>
             <div className="relative z-10 flex flex-col items-center gap-6 w-full h-full">
                 <div className="flex-1 w-full max-h-[85vh]">
                     <Book3D 

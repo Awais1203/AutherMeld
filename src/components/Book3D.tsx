@@ -237,8 +237,9 @@ const CSSPage = ({
       style={{
         zIndex,
         transformOrigin: "left center",
-        transition: "transform 900ms ease-in-out",
-        transform: flipped ? "rotateY(-180deg)" : "rotateY(0deg)",
+        transition: "transform 900ms cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: flipped ? "rotateY(-180deg) translateZ(0)" : "rotateY(0deg) translateZ(0)",
+        willChange: "transform",
       }}
       onClick={onFlip}
     >
@@ -312,7 +313,11 @@ export default function Book3D({ data, isOpen, onClick }: BookProps) {
       >
         <div
           className="relative transition-all duration-700"
-          style={{ transform: hovering ? "rotateY(-15deg) rotateX(4deg) scale(1.05)" : "rotateY(0deg) rotateX(0deg) scale(1)", transformStyle: "preserve-3d" }}
+          style={{ 
+            transform: hovering ? "rotateY(-15deg) rotateX(4deg) scale(1.05) translateZ(0)" : "rotateY(0deg) rotateX(0deg) scale(1) translateZ(0)", 
+            transformStyle: "preserve-3d",
+            willChange: "transform"
+          }}
         >
           <div
             className="w-52 h-[308px] bg-cover bg-center rounded-r-lg border-l-8 border-black/40 relative overflow-hidden"
@@ -391,11 +396,19 @@ export default function Book3D({ data, isOpen, onClick }: BookProps) {
             width:  "min(980px, 94vw)",
             height: "min(640px, 72vh)",
             perspective: "2800px",
-            filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.8)) drop-shadow(0 0 40px rgba(212,175,55,0.08))",
+            // Optimized box-shadow is significantly faster than drop-shadow filter
+            boxShadow: "0 40px 100px -20px rgba(0,0,0,0.9), 0 0 60px -10px rgba(212,175,55,0.15)",
+            transform: "translateZ(0)",
           }}
         >
-          {/* Ambient glow */}
-          <div className="absolute pointer-events-none rounded-full" style={{ inset: "10%", background: "rgba(188,108,37,0.05)", filter: "blur(40px)" }} />
+          {/* Simplified Ambient glow - radial gradient is faster than blur filter */}
+          <div className="absolute pointer-events-none rounded-full" 
+            style={{ 
+              inset: "0%", 
+              background: "radial-gradient(circle at center, rgba(188,108,37,0.08) 0%, transparent 70%)",
+              transform: "translateZ(-1px)" 
+            }} 
+          />
 
           {/* BOOK BLOCK — right half only */}
           <div
