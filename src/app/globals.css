@@ -35,3 +35,35 @@ h1, h2, h3, .font-serif {
 .animate-pulse-fade {
   animation: pulse-fade 3s ease-in-out infinite;
 }
+
+@keyframes book-float {
+  0%, 100% { transform: translateY(0px) rotateX(2deg); }
+  50%       { transform: translateY(-8px) rotateX(2deg); }
+}
+
+@keyframes page-glow {
+  0%, 100% { opacity: 0.06; }
+  50%       { opacity: 0.18; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-book-float {
+  animation: book-float 4s ease-in-out infinite;
+}
+
+.animate-page-glow {
+  animation: page-glow 2.5s ease-in-out infinite;
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #D4AF37 0%, #f5d783 40%, #D4AF37 70%, #a07d20 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}

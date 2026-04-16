@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LiveAvatarContextProvider, useLiveAvatarContext } from "../liveavatar/context";
 import { useSession } from "../liveavatar/useSession";
 import { Loader2, Send, BookOpen, Mic2 } from "lucide-react";
@@ -194,14 +194,14 @@ function SessionView({
     onReset,
     assessment,
     setAssessment,
-    transcript 
+    transcriptRef 
 }: { 
     pitchState: PitchState, 
     setPitchState: (s: PitchState) => void, 
     onReset: () => void,
     assessment: PersonalityAssessment | null,
     setAssessment: (a: PersonalityAssessment) => void,
-    transcript: string
+    transcriptRef: React.RefObject<string>
 }) {
     const { isStreamReady, attachElement } = useSession();
     const { sessionRef } = useLiveAvatarContext();
@@ -249,12 +249,16 @@ function SessionView({
         if (pitchState === "typing" && !assessment) {
             console.log("Starting Personality Assessment process...");
             
-            // 1. Calculate word count for the transcript check
-            const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
-            const effectiveTranscript = wordCount < 100 ? DUMMY_TRANSCRIPT : transcript;
+            // Read the ref directly — always has the latest value regardless of closure age
+            const currentTranscript = transcriptRef.current ?? "";
+            const wordCount = currentTranscript.trim().split(/\s+/).filter(Boolean).length;
+            console.log(`Transcript word count: ${wordCount}`);
+            console.log(`Transcript preview: ${currentTranscript.slice(0, 200)}`);
+
+            const effectiveTranscript = wordCount < 100 ? DUMMY_TRANSCRIPT : currentTranscript;
             
             if (wordCount < 100) {
-                console.log(`Transcript is short (${wordCount} words). Using Napoleon Hill dummy transcript fallback.`);
+                console.log(`Short transcript (${wordCount} words) — using Napoleon Hill dummy fallback.`);
             }
 
             // 2. Call the Stop API (for logging/cleanup)
@@ -278,7 +282,7 @@ function SessionView({
             })
             .catch(err => console.error("Assessment Failed:", err));
         }
-    }, [pitchState, assessment, transcript, setAssessment]);
+    }, [pitchState, assessment, transcriptRef, setAssessment]);
 
     const handleSend = async () => {
         const text = inputText.trim();
@@ -329,10 +333,17 @@ export default function InteractiveAvatar() {
     const [isLoading, setIsLoading] = useState(false);
     const [pitchState, setPitchState] = useState<PitchState>("zoomCall");
     const [transcript, setTranscript] = useState("");
+    // Keep a ref so effects always see the latest transcript without going stale
+    const transcriptRef = useRef("");
     const [assessment, setAssessment] = useState<PersonalityAssessment | null>(null);
 
-    // Track transcript from session
-    // setTranscript is passed down to SessionView if needed.
+    const updateTranscript = (updater: string | ((prev: string) => string)) => {
+        setTranscript(prev => {
+            const next = typeof updater === "function" ? updater(prev) : updater;
+            transcriptRef.current = next;
+            return next;
+        });
+    };
 
     useEffect(() => {
         const handleKeys = (e: KeyboardEvent) => {
@@ -386,17 +397,18 @@ export default function InteractiveAvatar() {
 
     return (
         <LiveAvatarContextProvider sessionAccessToken={sessionToken}>
-            <TranscriptTracker setTranscript={setTranscript} />
+            <TranscriptTracker setTranscript={updateTranscript} />
             <SessionView 
                 pitchState={pitchState} 
                 setPitchState={setPitchState} 
                 assessment={assessment}
                 setAssessment={setAssessment}
-                transcript={transcript}
+                transcriptRef={transcriptRef}
                 onReset={() => { 
                     setSessionToken(""); 
                     setPitchState("zoomCall"); 
                     setTranscript("");
+                    transcriptRef.current = "";
                     setAssessment(null);
                 }} 
             />
@@ -406,27 +418,53 @@ export default function InteractiveAvatar() {
 
 /**
  * HELPER: Component to track transcript within the Context
+ * Uses a polling interval to wait for sessionRef.current to be available
+ * (on production/Vercel the session is set asynchronously after mount)
  */
 function TranscriptTracker({ setTranscript }: { setTranscript: (t: string | ((prev: string) => string)) => void }) {
     const { sessionRef } = useLiveAvatarContext();
+    const attachedRef = useRef(false);
 
     useEffect(() => {
-        const session = sessionRef.current;
-        if (!session) return;
+        // Retry attaching until the session object exists
+        const tryAttach = () => {
+            const session = sessionRef.current;
+            if (!session || attachedRef.current) return;
 
-        const handleTalk = (event: { text?: string, event_type: string }) => {
-            if (event.text) {
-                setTranscript(prev => prev + "\n" + (event.event_type === AgentEventsEnum.USER_TRANSCRIPTION ? "User: " : "Avatar: ") + event.text);
-            }
+            attachedRef.current = true;
+            console.log("TranscriptTracker: Session found, attaching listeners.");
+
+            const handleTalk = (event: { text?: string; event_type: string }) => {
+                if (event.text) {
+                    const prefix = event.event_type === AgentEventsEnum.USER_TRANSCRIPTION ? "User: " : "Avatar: ";
+                    console.log("Transcript chunk:", prefix + event.text);
+                    setTranscript(prev => prev + "\n" + prefix + event.text);
+                }
+            };
+
+            session.on(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
+            session.on(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
+
+            // Store cleanup on the interval stop
+            return () => {
+                session.off(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
+                session.off(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
+            };
         };
 
-        session.on(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
-        session.on(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
-        return () => {
-            session.off(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
-            session.off(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
-        };
-    }, [sessionRef, setTranscript]);
+        // Try immediately
+        const cleanup = tryAttach();
+        if (cleanup) return cleanup;
+
+        // If session isn't ready yet, poll every 500ms (handles Vercel cold starts)
+        const interval = setInterval(() => {
+            const done = tryAttach();
+            if (done) clearInterval(interval);
+        }, 500);
+
+        return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionRef]);
 
     return null;
 }
