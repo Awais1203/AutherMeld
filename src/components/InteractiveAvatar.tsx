@@ -76,23 +76,31 @@ const AvatarStage = ({
 const TypingStage = ({ isActive, onComplete }: { isActive: boolean, onComplete: () => void }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     useEffect(() => {
-        if (isActive && videoRef.current) {
-            videoRef.current.currentTime = 0;
-            videoRef.current.play().catch(() => {});
+        const video = videoRef.current;
+        if (isActive && video) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
             
-            // Auto-advance to Split Screen after 10 seconds
             const timer = setTimeout(() => {
                 onComplete();
             }, 10000);
             return () => clearTimeout(timer);
-        } else if (videoRef.current) {
-            videoRef.current.pause();
+        } else if (video) {
+            video.pause();
         }
     }, [isActive, onComplete]);
 
     return (
         <div className="w-full h-full relative bg-black flex flex-col items-center justify-center overflow-hidden">
-            <video ref={videoRef} src="/typing.mp4" loop muted playsInline className="absolute inset-0 w-full h-full object-fill opacity-80" />
+            <video 
+                ref={videoRef} 
+                src="/typing.mp4" 
+                loop 
+                muted 
+                playsInline 
+                className="absolute inset-0 w-full h-full object-fill opacity-80"
+                style={{ willChange: "transform", transform: "translateZ(0)" }}
+            />
             <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 w-full text-center px-6">
                 <p className="text-white font-mono text-[16px] font-bold uppercase tracking-[0.4em] animate-pulse-fade opacity-90">
                     Protocol v2.0: Compiling Psychological Profile & Re-Authoring Manuscript...
@@ -268,8 +276,9 @@ function SessionView({
     };
 
     const getOverlayClass = (state: PitchState) => {
+        const isActive = pitchState === state;
         return `absolute inset-0 transition-all duration-1000 ease-in-out ${
-            pitchState === state ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-105 pointer-events-none"
+            isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-105 pointer-events-none hidden"
         }`;
     };
 

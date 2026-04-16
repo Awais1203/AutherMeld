@@ -343,6 +343,54 @@ export default function Book3D({ data, isOpen, onClick }: BookProps) {
   }
 
   // ── OPEN ─────────────────────────────────────────────────────────────────────
+  // LOADING STATE
+  if (isOpen && !data) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-12 bg-black animate-in fade-in duration-700">
+        <div className="relative mb-12">
+          <div className="absolute inset-[-30px] rounded-full bg-[#bc6c25]/10 animate-ping duration-[3000ms]" />
+          <div className="absolute inset-[-15px] rounded-full border border-[#bc6c25]/20 animate-pulse duration-[2000ms]" />
+          <div className="relative w-32 h-32 rounded-full border-2 border-[#bc6c25]/40 flex items-center justify-center bg-black shadow-[0_0_80px_rgba(188,108,37,0.2)]">
+            <BookMarked className="w-14 h-14 text-[#bc6c25] animate-pulse" />
+          </div>
+        </div>
+        
+        <div className="flex flex-col items-center gap-6 text-center max-w-xl">
+          <div className="space-y-2">
+            <p className="text-[#D4AF37] font-mono text-xl uppercase tracking-[0.6em] animate-pulse font-black">
+              Compiling
+            </p>
+            <p className="text-[#D4AF37] font-mono text-xl uppercase tracking-[0.4em] font-black">
+              Masterwork Manuscript
+            </p>
+          </div>
+          
+          <div className="w-48 h-px bg-gradient-to-r from-transparent via-[#bc6c25] to-transparent" />
+          
+          <p className="text-white/70 font-serif italic text-xl leading-relaxed px-10">
+            "Definiteness of purpose is the starting point of all achievement."
+          </p>
+          
+          <div className="flex flex-col items-center gap-1 opacity-60">
+            <p className="text-[#bc6c25] font-mono text-[10px] uppercase tracking-[0.5em] font-bold">
+              Protocol v2.0
+            </p>
+            <p className="text-white/40 font-mono text-[9px] uppercase tracking-widest">
+              Finalizing Psychological Analysis
+            </p>
+          </div>
+        </div>
+
+        <button 
+          onClick={onClick} 
+          className="mt-16 px-8 py-3 rounded-full border border-white/10 text-white/40 hover:text-[#bc6c25] hover:border-[#bc6c25]/40 font-mono text-[10px] uppercase tracking-[0.4em] transition-all hover:bg-[#bc6c25]/5 active:scale-95"
+        >
+          Cancel & Close
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center py-4 px-2 bg-transparent">
       <style jsx global>{`
