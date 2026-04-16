@@ -5,6 +5,8 @@ import { LiveAvatarContextProvider, useLiveAvatarContext } from "../liveavatar/c
 import { useSession } from "../liveavatar/useSession";
 import { Loader2, Send, BookOpen, Mic2 } from "lucide-react";
 import { SessionState, AgentEventsEnum } from "@heygen/liveavatar-web-sdk";
+import Book3D from "./Book3D";
+import { PersonalityAssessment } from "@/lib/personality";
 
 type PitchState = "zoomCall" | "typing" | "splitScreen" | "finalCover";
 
@@ -32,7 +34,6 @@ const AvatarStage = ({
                 
               
 
-                {/* HUD Overlay */}
                 <div className="absolute top-24 left-8 right-8 z-20 flex justify-between items-start pointer-events-none">
                     <div className="flex flex-col gap-3">
                         {isAvatarTalking && (
@@ -55,17 +56,6 @@ const AvatarStage = ({
                         <Mic2 className="w-3.5 h-3.5" />
                         {isMuted ? 'Mic Off' : 'Mic Live'}
                     </button>
-                </div>
-
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-30 flex gap-3 pointer-events-auto">
-                    <input
-                        type="text" value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && onSend()}
-                        placeholder="Engage with the Author..."
-                        className="flex-1 bg-black/80 backdrop-blur-2xl border border-white/10 rounded-full px-8 py-5 text-sm focus:outline-none focus:border-[#D4AF37]/50 text-white"
-                    />
-                    <button onClick={onSend} className="p-5 bg-[#D4AF37] text-black rounded-full shadow-[0_0_40px_rgba(212,175,55,0.3)] cursor-pointer"><Send className="w-6 h-6" /></button>
                 </div>
 
                 {!isStreamReady && sessionState !== SessionState.DISCONNECTED && (
@@ -137,7 +127,7 @@ const MeldStage = ({ isActive, onComplete }: { isActive: boolean, onComplete: ()
             <div className="border-r border-white/5 flex flex-col p-24 justify-center gap-10 bg-black/20">
                 <span className="text-[10px] font-mono uppercase tracking-[0.5em] text-white/40">ORIGINAL TEXT (1937)</span>
                 <p className="max-w-xl text-2xl font-serif text-white/30 italic leading-relaxed">
-                    "Truly, thoughts are things, and powerful things at that, when they are mixed with definiteness of purpose, persistence, and a burning desire for their translation into riches, or other material objects."
+                    &quot;Truly, thoughts are things, and powerful things at that, when they are mixed with definiteness of purpose, persistence, and a burning desire for their translation into riches, or other material objects.&quot;
                 </p>
             </div>
             <div className="flex flex-col p-24 justify-center gap-10 bg-gradient-to-br from-black/0 to-[#D4AF37]/5">
@@ -158,25 +148,60 @@ const MeldStage = ({ isActive, onComplete }: { isActive: boolean, onComplete: ()
 /**
  * STATE 4: REVEAL STAGE (finalCover)
  */
-const RevealStage = ({ onReset }: { onReset: () => void }) => (
-    <div className="w-full h-full bg-black flex items-center justify-center p-12 relative animate-in zoom-in-95 fade-in duration-1000">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#D4AF3715_0%,_transparent_70%)] opacity-30"></div>
-        <div className="relative z-10 flex flex-col items-center gap-12">
-            <div className="relative group">
-                <img src="/cover.jpg" className="max-h-[85vh] object-contain shadow-[0_50px_100px_rgba(0,0,0,1)] border border-white/10 group-hover:scale-105 transition-transform duration-1000" alt="Cover" />
-                <div className="absolute -inset-4 border border-[#D4AF37]/10 rounded-sm -z-10 group-hover:-inset-6 transition-all duration-1000"></div>
+const RevealStage = ({ 
+    onReset, 
+    assessment 
+}: { 
+    onReset: () => void, 
+    assessment: PersonalityAssessment | null 
+}) => {
+    const [isBookOpen, setIsBookOpen] = useState(false);
+
+    return (
+        <div className="w-full h-full bg-black flex items-center justify-center p-12 relative animate-in zoom-in-95 fade-in duration-1000">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#D4AF3715_0%,_transparent_70%)] opacity-30"></div>
+            <div className="relative z-10 flex flex-col items-center gap-6 w-full h-full">
+                <div className="flex-1 w-full max-h-[85vh]">
+                    <Book3D 
+                        data={assessment} 
+                        isOpen={isBookOpen} 
+                        onClick={() => setIsBookOpen(!isBookOpen)} 
+                    />
+                </div>
+                
+                <div className="flex flex-col items-center gap-4">
+                    {!isBookOpen && (
+                        <p className="text-[#D4AF37] font-mono text-[10px] uppercase tracking-[0.4em] animate-pulse">
+                            Click the Manuscript to reveal your profile
+                        </p>
+                    )}
+                    <button onClick={onReset} className="px-10 py-4 border border-white/10 text-white/30 font-mono text-[9px] uppercase tracking-[0.4em] hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all cursor-pointer">
+                        Reset AuthorMeld Session
+                    </button>
+                </div>
             </div>
-            <button onClick={onReset} className="px-10 py-4 border border-white/10 text-white/30 font-mono text-[9px] uppercase tracking-[0.4em] hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all cursor-pointer">
-                Reset AuthorMeld Session
-            </button>
         </div>
-    </div>
-);
+    );
+};
 
 /**
  * THE SESSION VIEW ORCHESTRATOR
  */
-function SessionView({ pitchState, setPitchState, onReset }: { pitchState: PitchState, setPitchState: (s: PitchState) => void, onReset: () => void }) {
+function SessionView({ 
+    pitchState, 
+    setPitchState, 
+    onReset,
+    assessment,
+    setAssessment,
+    transcript 
+}: { 
+    pitchState: PitchState, 
+    setPitchState: (s: PitchState) => void, 
+    onReset: () => void,
+    assessment: PersonalityAssessment | null,
+    setAssessment: (a: PersonalityAssessment) => void,
+    transcript: string
+}) {
     const { isStreamReady, attachElement } = useSession();
     const { sessionRef } = useLiveAvatarContext();
     const [inputText, setInputText] = useState("");
@@ -203,9 +228,9 @@ function SessionView({ pitchState, setPitchState, onReset }: { pitchState: Pitch
         const session = sessionRef.current;
         if (!session) return;
 
-        const handleTranscription = (event: any) => {
+        const handleTranscription = (event: { text?: string }) => {
             const text = event.text?.toLowerCase() || "";
-            // Look for the "holy grail" trigger phrase
+            // Look for the &quot;holy grail&quot; trigger phrase
             if (text.includes("integrate your profile") || text.includes("integrate your profile into our manuscript")) {
                 console.log("Trigger phrase detected! Transitioning to Typing Stage...");
                 setPitchState("typing");
@@ -217,6 +242,23 @@ function SessionView({ pitchState, setPitchState, onReset }: { pitchState: Pitch
             session.off(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTranscription);
         };
     }, [pitchState, setPitchState, sessionRef]);
+
+    // Background Assessment Trigger
+    useEffect(() => {
+        if (pitchState === "typing" && !assessment && transcript) {
+            console.log("Starting Personality Assessment based on transcript...");
+            fetch("/api/assessment", {
+                method: "POST",
+                body: JSON.stringify({ transcript }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Assessment Complete:", data);
+                setAssessment(data);
+            })
+            .catch(err => console.error("Assessment Failed:", err));
+        }
+    }, [pitchState, assessment, transcript, setAssessment]);
 
     const handleSend = async () => {
         const text = inputText.trim();
@@ -253,7 +295,7 @@ function SessionView({ pitchState, setPitchState, onReset }: { pitchState: Pitch
 
             {/* STATE 4: REVEAL */}
             <div className={getOverlayClass("finalCover")}>
-                <RevealStage onReset={onReset} />
+                <RevealStage onReset={onReset} assessment={assessment} />
             </div>
         </div>
     );
@@ -266,6 +308,11 @@ export default function InteractiveAvatar() {
     const [sessionToken, setSessionToken] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [pitchState, setPitchState] = useState<PitchState>("zoomCall");
+    const [transcript, setTranscript] = useState("");
+    const [assessment, setAssessment] = useState<PersonalityAssessment | null>(null);
+
+    // Track transcript from session
+    // setTranscript is passed down to SessionView if needed.
 
     useEffect(() => {
         const handleKeys = (e: KeyboardEvent) => {
@@ -309,14 +356,54 @@ export default function InteractiveAvatar() {
                 <button onClick={start} disabled={isLoading} className="group relative px-16 py-6 border border-[#D4AF37]/30 bg-black text-[#D4AF37] font-extrabold uppercase tracking-[0.3em] text-xs hover:bg-[#D4AF37] hover:text-black active:scale-95 transition-all shadow-[0_0_80px_rgba(212,175,55,0.1)] cursor-pointer">
                     {isLoading ? <Loader2 className="animate-spin" /> : "Initiate Mentor Session"}
                 </button>
-                <p className="text-white/20 font-serif text-sm italic italic leading-relaxed">"Opportunity often comes disguised in the form of misfortune, or temporary defeat."</p>
+                <p className="text-white/20 font-serif text-sm italic italic leading-relaxed">&quot;Opportunity often comes disguised in the form of misfortune, or temporary defeat.&quot;</p>
             </div>
         </div>
     );
 
     return (
         <LiveAvatarContextProvider sessionAccessToken={sessionToken}>
-            <SessionView pitchState={pitchState} setPitchState={setPitchState} onReset={() => { setSessionToken(""); setPitchState("zoomCall"); }} />
+            <TranscriptTracker setTranscript={setTranscript} />
+            <SessionView 
+                pitchState={pitchState} 
+                setPitchState={setPitchState} 
+                assessment={assessment}
+                setAssessment={setAssessment}
+                transcript={transcript}
+                onReset={() => { 
+                    setSessionToken(""); 
+                    setPitchState("zoomCall"); 
+                    setTranscript("");
+                    setAssessment(null);
+                }} 
+            />
         </LiveAvatarContextProvider>
     );
+}
+
+/**
+ * HELPER: Component to track transcript within the Context
+ */
+function TranscriptTracker({ setTranscript }: { setTranscript: (t: string | ((prev: string) => string)) => void }) {
+    const { sessionRef } = useLiveAvatarContext();
+
+    useEffect(() => {
+        const session = sessionRef.current;
+        if (!session) return;
+
+        const handleTalk = (event: { text?: string, event_type: string }) => {
+            if (event.text) {
+                setTranscript(prev => prev + "\n" + (event.event_type === AgentEventsEnum.USER_TRANSCRIPTION ? "User: " : "Avatar: ") + event.text);
+            }
+        };
+
+        session.on(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
+        session.on(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
+        return () => {
+            session.off(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTalk);
+            session.off(AgentEventsEnum.USER_TRANSCRIPTION, handleTalk);
+        };
+    }, [sessionRef, setTranscript]);
+
+    return null;
 }
