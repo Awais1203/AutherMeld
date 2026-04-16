@@ -224,25 +224,6 @@ function SessionView({
         }
     }, [pitchState, sessionRef]);
 
-    // Automatic Speech Trigger (State 1 -> State 2)
-    useEffect(() => {
-        const session = sessionRef.current;
-        if (!session) return;
-
-        const handleTranscription = (event: { text?: string }) => {
-            const text = event.text?.toLowerCase() || "";
-            // Look for the &quot;holy grail&quot; trigger phrase
-            if (text.includes("integrate your profile") || text.includes("integrate your profile into our manuscript")) {
-                console.log("Trigger phrase detected! Transitioning to Typing Stage...");
-                setPitchState("typing");
-            }
-        };
-
-        session.on(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTranscription);
-        return () => {
-            session.off(AgentEventsEnum.AVATAR_TRANSCRIPTION, handleTranscription);
-        };
-    }, [pitchState, setPitchState, sessionRef]);
 
     // Background Assessment Trigger
     useEffect(() => {
@@ -397,7 +378,15 @@ export default function InteractiveAvatar() {
 
     return (
         <LiveAvatarContextProvider sessionAccessToken={sessionToken}>
-            <TranscriptTracker setTranscript={updateTranscript} />
+            <TranscriptTracker 
+                setTranscript={updateTranscript} 
+                onTrigger={() => {
+                    console.log("Trigger phrase callback executed. Waiting 2s before transition...");
+                    setTimeout(() => {
+                        setPitchState("typing");
+                    }, 2000);
+                }}
+            />
             <SessionView 
                 pitchState={pitchState} 
                 setPitchState={setPitchState} 
@@ -421,7 +410,13 @@ export default function InteractiveAvatar() {
  * Uses a polling interval to wait for sessionRef.current to be available
  * (on production/Vercel the session is set asynchronously after mount)
  */
-function TranscriptTracker({ setTranscript }: { setTranscript: (t: string | ((prev: string) => string)) => void }) {
+function TranscriptTracker({ 
+    setTranscript,
+    onTrigger
+}: { 
+    setTranscript: (t: string | ((prev: string) => string)) => void,
+    onTrigger: () => void
+}) {
     const { sessionRef } = useLiveAvatarContext();
     const attachedRef = useRef(false);
 
@@ -437,8 +432,17 @@ function TranscriptTracker({ setTranscript }: { setTranscript: (t: string | ((pr
             const handleTalk = (event: { text?: string; event_type: string }) => {
                 if (event.text) {
                     const prefix = event.event_type === AgentEventsEnum.USER_TRANSCRIPTION ? "User: " : "Avatar: ";
-                    console.log("Transcript chunk:", prefix + event.text);
-                    setTranscript(prev => prev + "\n" + prefix + event.text);
+                    const text = event.text;
+                    setTranscript(prev => prev + "\n" + prefix + text);
+
+                    // If it's the avatar talking, check for the transition trigger
+                    if (event.event_type === AgentEventsEnum.AVATAR_TRANSCRIPTION) {
+                        const lowerText = text.toLowerCase();
+                        if (lowerText.includes("integrate your profile")) {
+                            console.log("Speech Trigger Detected: 'integrate your profile'");
+                            onTrigger();
+                        }
+                    }
                 }
             };
 
