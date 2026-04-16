@@ -171,11 +171,6 @@ const RevealStage = ({
                 </div>
                 
                 <div className="flex flex-col items-center gap-4">
-                    {!isBookOpen && (
-                        <p className="text-[#D4AF37] font-mono text-[10px] uppercase tracking-[0.4em] animate-pulse">
-                            Click the Manuscript to reveal your profile
-                        </p>
-                    )}
                     <button onClick={onReset} className="px-10 py-4 border border-white/10 text-white/30 font-mono text-[9px] uppercase tracking-[0.4em] hover:text-[#D4AF37] hover:border-[#D4AF37] transition-all cursor-pointer">
                         Reset AuthorMeld Session
                     </button>
