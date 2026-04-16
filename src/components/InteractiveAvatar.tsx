@@ -30,17 +30,7 @@ const AvatarStage = ({
         <div className="relative w-[80vw] h-[80vh] bg-black rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] ring-1 ring-white/5">
                 <video ref={videoRef} autoPlay playsInline className="w-full h-full object-contain z-0" />
                 
-                {/* Fake Zoom Header - Phase 3 Requirements */}
-                <div className="absolute top-0 w-full p-6 flex justify-between items-center bg-black/40 backdrop-blur-sm z-50 border-b border-white/5">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                        <span className="font-mono font-bold tracking-[0.4em] text-[10px] text-white/60">ENCRYPTED CONNECTION</span>
-                    </div>
-                    <div className="bg-red-600/20 border border-red-600/50 px-4 py-1.5 rounded flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
-                        <span className="text-[9px] font-bold text-red-500 uppercase tracking-widest leading-none">Live Engagement</span>
-                    </div>
-                </div>
+              
 
                 {/* HUD Overlay */}
                 <div className="absolute top-24 left-8 right-8 z-20 flex justify-between items-start pointer-events-none">
