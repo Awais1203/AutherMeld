@@ -190,6 +190,14 @@ function SessionView({ pitchState, setPitchState, onReset }: { pitchState: Pitch
         }
     }, [isStreamReady, attachElement, pitchState]);
 
+    // Sequential Cleanup: STOP AVATAR when leaving Zoom stage
+    useEffect(() => {
+        if (pitchState !== "zoomCall" && sessionRef.current) {
+            console.log("SDK: Leaving Zoom Stage - Stopping Avatar Session...");
+            sessionRef.current.stop();
+        }
+    }, [pitchState, sessionRef]);
+
     // Automatic Speech Trigger (State 1 -> State 2)
     useEffect(() => {
         const session = sessionRef.current;
