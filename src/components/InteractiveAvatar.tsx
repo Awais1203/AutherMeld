@@ -7,6 +7,7 @@ import { Loader2, Send, BookOpen, Mic2 } from "lucide-react";
 import { SessionState, AgentEventsEnum } from "@heygen/liveavatar-web-sdk";
 import Book3D from "./Book3D";
 import { PersonalityAssessment } from "@/lib/personality";
+import { DUMMY_TRANSCRIPT } from "@/lib/constants";
 
 type PitchState = "zoomCall" | "typing" | "splitScreen" | "finalCover";
 
@@ -245,11 +246,30 @@ function SessionView({
 
     // Background Assessment Trigger
     useEffect(() => {
-        if (pitchState === "typing" && !assessment && transcript) {
-            console.log("Starting Personality Assessment based on transcript...");
+        if (pitchState === "typing" && !assessment) {
+            console.log("Starting Personality Assessment process...");
+            
+            // 1. Calculate word count for the transcript check
+            const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
+            const effectiveTranscript = wordCount < 100 ? DUMMY_TRANSCRIPT : transcript;
+            
+            if (wordCount < 100) {
+                console.log(`Transcript is short (${wordCount} words). Using Napoleon Hill dummy transcript fallback.`);
+            }
+
+            // 2. Call the Stop API (for logging/cleanup)
+            fetch("/api/stop", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transcript: effectiveTranscript }),
+            }).catch(err => console.error("Stop API failed:", err));
+
+            // 3. Call the Assessment API
+            console.log("Triggering Personality Assessment API...");
             fetch("/api/assessment", {
                 method: "POST",
-                body: JSON.stringify({ transcript }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transcript: effectiveTranscript }),
             })
             .then(res => res.json())
             .then(data => {
@@ -317,7 +337,10 @@ export default function InteractiveAvatar() {
     useEffect(() => {
         const handleKeys = (e: KeyboardEvent) => {
             if (e.key === "1") setPitchState("zoomCall");
-            if (e.key === "2") setPitchState("typing");
+            if (e.key === "2") {
+                console.log("Manual Stop Triggered (Key 2)");
+                setPitchState("typing");
+            }
             if (e.key === "3") setPitchState("splitScreen");
         };
         window.addEventListener("keydown", handleKeys);
