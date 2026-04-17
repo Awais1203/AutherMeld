@@ -29,40 +29,41 @@ const AvatarStage = ({
     const { sessionState } = useLiveAvatarContext();
 
     return (
-        <div className="w-full h-full flex items-center justify-center bg-[#0a0a0a] p-8 animate-in fade-in duration-700">
-        <div className="relative w-[80vw] h-[80vh] bg-black rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] ring-1 ring-white/5">
-                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-contain z-0" />
+        <div className="w-full h-full flex items-center justify-center bg-[#0a0a0a] p-0 sm:p-8 animate-in fade-in duration-700">
+            <div className="relative w-full h-full sm:h-auto sm:aspect-video max-w-6xl bg-black rounded-none sm:rounded-3xl overflow-hidden border-x sm:border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] ring-0 sm:ring-1 ring-white/5">
+                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover sm:object-contain z-0" />
                 
               
 
-                <div className="absolute top-24 left-8 right-8 z-20 flex justify-between items-start pointer-events-none">
-                    <div className="flex flex-col gap-3">
+                <div className="absolute top-6 sm:top-12 lg:top-24 left-4 sm:left-8 right-4 sm:right-8 z-20 flex justify-between items-start pointer-events-none">
+                    <div className="flex flex-col gap-2 sm:gap-3">
                         {isAvatarTalking && (
-                            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-black/60 backdrop-blur-md border border-[#D4AF37]/50 shadow-xl">
-                                <div className="w-2.5 h-2.5 rounded-full bg-[#D4AF37] animate-pulse"></div>
-                                <span className="text-[11px] text-[#D4AF37] font-mono uppercase tracking-[0.2em] font-bold">Napoleon Hill Speaking</span>
+                            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-black/60 backdrop-blur-md border border-[#D4AF37]/50 shadow-xl">
+                                <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#D4AF37] animate-pulse"></div>
+                                <span className="text-[9px] sm:text-[11px] text-[#D4AF37] font-mono uppercase tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap">Napoleon Hill Speaking</span>
                             </div>
                         )}
                         {isUserTalking && (
-                            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-blue-500/20 backdrop-blur-md border border-blue-400/50 shadow-xl">
-                                <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
-                                <span className="text-[11px] text-blue-400 font-mono uppercase tracking-[0.2em] font-bold">Listening...</span>
+                            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-blue-500/20 backdrop-blur-md border border-blue-400/50 shadow-xl">
+                                <div className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-blue-400"></div>
+                                <span className="text-[9px] sm:text-[11px] text-blue-400 font-mono uppercase tracking-[0.15em] sm:tracking-[0.2em] font-bold whitespace-nowrap">Listening...</span>
                             </div>
                         )}
                     </div>
                     <button 
                         onClick={() => isMuted ? unmute() : mute()}
-                        className="pointer-events-auto cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-[11px] uppercase tracking-widest border bg-black/40 border-white/10 text-white hover:bg-white hover:text-black transition-all"
+                        className="pointer-events-auto cursor-pointer flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-mono text-[9px] sm:text-[11px] uppercase tracking-widest border bg-black/40 border-white/10 text-white hover:bg-white hover:text-black transition-all"
                     >
-                        <Mic2 className="w-3.5 h-3.5" />
-                        {isMuted ? 'Mic Off' : 'Mic Live'}
+                        <Mic2 className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+                        <span className="hidden sm:inline">{isMuted ? 'Mic Off' : 'Mic Live'}</span>
+                        <span className="sm:hidden">{isMuted ? 'Off' : 'On'}</span>
                     </button>
                 </div>
 
                 {!isStreamReady && sessionState !== SessionState.DISCONNECTED && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/95">
-                        <Loader2 className="w-12 h-12 animate-spin text-[#D4AF37] mb-6" />
-                        <p className="text-[#D4AF37] font-mono text-[10px] uppercase tracking-[0.5em]">Synchronizing Master Mind Session...</p>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/95 p-6 text-center">
+                        <Loader2 className="w-8 sm:w-12 h-8 sm:h-12 animate-spin text-[#D4AF37] mb-4 sm:mb-6" />
+                        <p className="text-[#D4AF37] font-mono text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.5em]">Synchronizing Master Mind Session...</p>
                     </div>
                 )}
             </div>
@@ -98,11 +99,11 @@ const TypingStage = ({ isActive, onComplete }: { isActive: boolean, onComplete: 
                 loop 
                 muted 
                 playsInline 
-                className="absolute inset-0 w-full h-full object-fill opacity-80"
+                className="absolute inset-0 w-full h-full object-cover opacity-80"
                 style={{ willChange: "transform", transform: "translateZ(0)" }}
             />
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 w-full text-center px-6">
-                <p className="text-white font-mono text-[16px] font-bold uppercase tracking-[0.4em] animate-pulse-fade opacity-90">
+            <div className="absolute bottom-12 sm:bottom-24 left-0 right-0 z-20 w-full text-center px-6">
+                <p className="text-white font-mono text-sm sm:text-base lg:text-xl font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] animate-pulse-fade opacity-90 mx-auto max-w-4xl">
                     Protocol v2.0: Compiling Psychological Profile & Re-Authoring Manuscript...
                 </p>
             </div>
@@ -132,21 +133,21 @@ const MeldStage = ({ isActive, onComplete }: { isActive: boolean, onComplete: ()
     }, [isActive]);
 
     return (
-        <div className="w-full h-full grid grid-cols-2 bg-[#111827] relative animate-in slide-in-from-bottom-10 duration-1000">
-            <div className="border-r border-white/5 flex flex-col p-24 justify-center gap-10 bg-black/20">
-                <span className="text-[10px] font-mono uppercase tracking-[0.5em] text-white/40">ORIGINAL TEXT (1937)</span>
-                <p className="max-w-xl text-2xl font-serif text-white/30 italic leading-relaxed">
+        <div className="w-full h-full grid grid-cols-1 lg:grid-cols-2 bg-[#111827] relative animate-in slide-in-from-bottom-10 duration-1000 overflow-y-auto lg:overflow-hidden">
+            <div className="border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col p-8 sm:p-12 lg:p-24 justify-center gap-6 sm:gap-10 bg-black/20 min-h-[50vh] lg:min-h-0">
+                <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.3em] sm:tracking-[0.5em] text-white/40">ORIGINAL TEXT (1937)</span>
+                <p className="max-w-xl text-xl sm:text-2xl lg:text-3xl font-serif text-white/30 italic leading-relaxed">
                     &quot;Truly, thoughts are things, and powerful things at that, when they are mixed with definiteness of purpose, persistence, and a burning desire for their translation into riches, or other material objects.&quot;
                 </p>
             </div>
-            <div className="flex flex-col p-24 justify-center gap-10 bg-gradient-to-br from-black/0 to-[#D4AF37]/5">
-                <span className="text-[10px] font-mono uppercase tracking-[0.5em] text-[#D4AF37] drop-shadow-[0_0_100px_rgba(212,175,55,0.4)] font-bold">MELDED TEXT (LIVE)</span>
-                <p className="max-w-xl min-h-[300px] text-3xl font-serif text-[#D4AF37] leading-snug tracking-tight">
-                    {liveText}<span className="inline-block w-1 h-8 bg-[#D4AF37] ml-2 animate-pulse translate-y-1"></span>
+            <div className="flex flex-col p-8 sm:p-12 lg:p-24 justify-center gap-6 sm:gap-10 bg-gradient-to-br from-black/0 to-[#D4AF37]/5 min-h-[50vh] lg:min-h-0">
+                <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#D4AF37] drop-shadow-[0_0_100px_rgba(212,175,55,0.4)] font-bold">MELDED TEXT (LIVE)</span>
+                <p className="max-w-xl min-h-[200px] sm:min-h-[300px] text-2xl sm:text-3xl lg:text-4xl font-serif text-[#D4AF37] leading-snug tracking-tight">
+                    {liveText}<span className="inline-block w-1 h-6 sm:h-8 bg-[#D4AF37] ml-2 animate-pulse translate-y-1"></span>
                 </p>
             </div>
-            <div className="absolute bottom-16 left-0 right-0 flex justify-center z-50">
-                <button onClick={onComplete} className="px-12 py-5 bg-[#D4AF37] text-black font-extrabold uppercase tracking-[0.3em] text-[10px] rounded-full shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-110 active:scale-95 transition-all cursor-pointer">
+            <div className="sticky lg:absolute bottom-8 sm:bottom-16 left-0 right-0 flex justify-center z-50 p-6 lg:p-0">
+                <button onClick={onComplete} className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-[#D4AF37] text-black font-extrabold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[9px] sm:text-[10px] rounded-full shadow-[0_0_40px_rgba(212,175,55,0.2)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
                     Compile Final Manuscript
                 </button>
             </div>
@@ -170,7 +171,7 @@ const RevealStage = ({
         <div className="w-full h-full bg-black flex items-center justify-center p-12 relative animate-in zoom-in-95 fade-in duration-1000">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#D4AF3715_0%,_transparent_70%)] opacity-30" style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}></div>
             <div className="relative z-10 flex flex-col items-center gap-6 w-full h-full">
-                <div className="flex-1 w-full max-h-[85vh]">
+                <div className="flex-1 w-full overflow-auto custom-scrollbar p-8 flex justify-start items-start lg:justify-center lg:items-center">
                     <Book3D 
                         data={assessment} 
                         isOpen={isBookOpen} 

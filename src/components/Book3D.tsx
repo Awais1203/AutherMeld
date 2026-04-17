@@ -64,7 +64,7 @@ const PageRenderer = ({ type, data, side }: { type: string; data: PersonalityAss
             <span className={cursiveClass}>Identity Profile</span>
             <div className="h-px mb-4" style={{ background: "linear-gradient(to right, #bc6c25, transparent)" }} />
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-3xl font-extrabold tracking-tighter uppercase leading-none">{data.primaryClassification.type}</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold tracking-tighter uppercase leading-none">{data.primaryClassification.type}</h1>
               <ConfidenceBadge level={data.primaryClassification.confidence} />
             </div>
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#bc6c25] mt-1 opacity-70">Primary Personality Pattern</p>
@@ -74,14 +74,14 @@ const PageRenderer = ({ type, data, side }: { type: string; data: PersonalityAss
               const isActive = data.primaryClassification.type.toUpperCase().includes(t);
               return (
                 <div key={t} className={`rounded-lg p-2 text-center border transition-all ${isActive ? "bg-[#bc6c25] border-[#bc6c25] text-white" : "bg-black/5 border-black/5 text-black/30"}`}>
-                  <p className="text-[8px] font-mono font-bold uppercase tracking-widest leading-none">{t}</p>
+                  <p className="text-[7px] sm:text-[8px] lg:text-[10px] font-mono font-bold uppercase tracking-widest leading-none">{t}</p>
                 </div>
               );
             })}
           </div>
           <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
             <h2 className="text-[10px] font-mono uppercase tracking-widest text-[#bc6c25] mb-2 font-bold">Executive Summary</h2>
-            <p className="text-base leading-relaxed italic text-[#3a5a40] font-medium border-l-4 border-[#bc6c25]/30 pl-4 py-2">{data.primaryClassification.summary}</p>
+            <p className="text-sm sm:text-base lg:text-xl leading-relaxed italic text-[#3a5a40] font-medium border-l-4 border-[#bc6c25]/30 pl-4 py-2">{data.primaryClassification.summary}</p>
           </div>
           <p className="text-[9px] font-mono opacity-20 mt-4 text-center uppercase tracking-[0.4em]">AuthorMeld · Meld Manuscript · Page 1</p>
         </div>
@@ -139,8 +139,8 @@ const PageRenderer = ({ type, data, side }: { type: string; data: PersonalityAss
                   <span className="text-white text-[9px] font-bold">{i + 1}</span>
                 </div>
                 <p className="text-[9px] font-mono uppercase tracking-widest text-[#bc6c25] mb-1.5 font-bold">{ev.description}</p>
-                <blockquote className="text-sm leading-relaxed italic font-medium mb-2 text-[#1a1a1a] bg-[#bc6c25]/5 border-l-2 border-[#bc6c25]/30 pl-3 py-1.5 rounded-r-sm">"{ev.quote}"</blockquote>
-                <p className="text-xs opacity-60 leading-relaxed">{ev.impact}</p>
+                <blockquote className="text-xs sm:text-sm lg:text-base leading-relaxed italic font-medium mb-2 text-[#1a1a1a] bg-[#bc6c25]/5 border-l-2 border-[#bc6c25]/30 pl-3 py-1.5 rounded-r-sm">"{ev.quote}"</blockquote>
+                <p className="text-[10px] sm:text-xs lg:text-sm opacity-60 leading-relaxed">{ev.impact}</p>
               </div>
             ))}
           </div>
@@ -155,17 +155,17 @@ const PageRenderer = ({ type, data, side }: { type: string; data: PersonalityAss
           <div className="h-px mb-4" style={{ background: "linear-gradient(to right, #bc6c25, transparent)" }} />
           <div className="mb-4 p-3 bg-[#283618]/5 rounded-xl border border-[#283618]/10">
             <h3 className="text-[9px] font-mono uppercase tracking-widest text-[#283618] mb-1 font-bold">Secondary Driver</h3>
-            <p className="text-xl font-extrabold uppercase leading-none mb-1">{data.secondaryType.type}</p>
-            <p className="text-xs leading-relaxed opacity-70 italic">{data.secondaryType.explanation}</p>
+            <p className="text-lg sm:text-xl lg:text-3xl font-extrabold uppercase leading-none mb-1">{data.secondaryType.type}</p>
+            <p className="text-[10px] sm:text-xs lg:text-sm leading-relaxed opacity-70 italic">{data.secondaryType.explanation}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="p-3 rounded-xl border border-[#bc6c25]/15" style={{ background: "rgba(188,108,37,0.06)" }}>
               <h4 className="text-[8px] font-mono uppercase tracking-widest text-[#bc6c25] mb-1.5 font-bold">Recommended Tone</h4>
-              <p className="text-xs font-medium leading-tight">{data.personalityTemplate.tone}</p>
+              <p className="text-[10px] sm:text-xs lg:text-sm font-medium leading-tight">{data.personalityTemplate.tone}</p>
             </div>
             <div className="p-3 rounded-xl border border-[#283618]/10 bg-[#283618]/5">
               <h4 className="text-[8px] font-mono uppercase tracking-widest text-[#283618] mb-1.5 font-bold">Linguistic Style</h4>
-              <p className="text-xs font-medium leading-tight">{data.personalityTemplate.languageStyle}</p>
+              <p className="text-[10px] sm:text-xs lg:text-sm font-medium leading-tight">{data.personalityTemplate.languageStyle}</p>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-4">
@@ -392,7 +392,7 @@ export default function Book3D({ data, isOpen, onClick }: BookProps) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center py-4 px-2 bg-transparent">
+    <div className="min-w-max min-h-max flex flex-col items-start lg:items-center justify-start lg:justify-center py-4 px-2 bg-transparent">
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Lovers+Quarrel&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
         .preserve-3d { transform-style: preserve-3d; }
@@ -441,9 +441,9 @@ export default function Book3D({ data, isOpen, onClick }: BookProps) {
         <div
           className="relative shrink-0"
           style={{
-            width:  "min(980px, 94vw)",
-            height: "min(640px, 72vh)",
-            perspective: "2800px",
+            width:  "1200px",
+            height: "800px",
+            perspective: "3000px",
             // Optimized box-shadow is significantly faster than drop-shadow filter
             boxShadow: "0 40px 100px -20px rgba(0,0,0,0.9), 0 0 60px -10px rgba(212,175,55,0.15)",
             transform: "translateZ(0)",
